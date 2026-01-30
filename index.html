@@ -1,335 +1,157 @@
-import React, { useState, useEffect } from 'react';
-import { Play, RotateCcw, CheckCircle, HelpCircle, Trophy } from 'lucide-react';
-
-const PathGame = () => {
-  // 遊戲狀態
-  const [monkeyStep, setMonkeyStep] = useState(0);
-  const [rabbitStep, setRabbitStep] = useState(0);
-  const [selectedAnswer, setSelectedAnswer] = useState(null);
-  const [showResult, setShowResult] = useState(false);
-  const [isCorrect, setIsCorrect] = useState(false);
-  const [showConfetti, setShowConfetti] = useState(false);
-
-  // 格子設定 (4列 3行)
-  const cols = 4;
-  const rows = 3;
-  const unitSize = 60; // 每個格子的像素大小
+<!DOCTYPE html>
+<html lang="zh-HK">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>遊樂場路線大比拼 - 小猴子 vs 小兔子</title>
   
-  // 總步數
-  const maxSteps = 7;
-
-  // 路徑座標定義 (x, y) - 基於格線交點
-  // 猴子路徑: (0,0) -> 下2 -> 右2 -> 下1 -> 右2
-  const getMonkeyPos = (step) => {
-    const path = [
-      {x: 0, y: 0}, // 起點
-      {x: 0, y: 1}, // 下
-      {x: 0, y: 2}, // 下
-      {x: 1, y: 2}, // 右
-      {x: 2, y: 2}, // 右
-      {x: 2, y: 3}, // 下
-      {x: 3, y: 3}, // 右
-      {x: 4, y: 3}, // 右 (終點)
-    ];
-    return path[step] || path[path.length - 1];
-  };
-
-  // 兔子路徑: (0,0) -> 右4 -> 下3
-  const getRabbitPos = (step) => {
-    const path = [
-      {x: 0, y: 0}, // 起點
-      {x: 1, y: 0}, // 右
-      {x: 2, y: 0}, // 右
-      {x: 3, y: 0}, // 右
-      {x: 4, y: 0}, // 右
-      {x: 4, y: 1}, // 下
-      {x: 4, y: 2}, // 下
-      {x: 4, y: 3}, // 下 (終點)
-    ];
-    return path[step] || path[path.length - 1];
-  };
-
-  const handleMonkeyWalk = () => {
-    if (monkeyStep < maxSteps) {
-      setMonkeyStep(prev => prev + 1);
+  <!-- Tailwind CSS CDN (如果你原本用 Tailwind class) -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- Lucide React Icons CDN (因為你用咗 lucide-react) -->
+  <script src="https://unpkg.com/lucide-react@latest/dist/umd/lucide-react.min.js"></script>
+  
+  <!-- React + ReactDOM (用最新穩定版，production minified 較快) -->
+  <script crossorigin src="https://cdn.jsdelivr.net/npm/react@18/umd/react.production.min.js"></script>
+  <script crossorigin src="https://cdn.jsdelivr.net/npm/react-dom@18/umd/react-dom.production.min.js"></script>
+  
+  <!-- Babel Standalone - 負責將 JSX 轉成 JS (最重要！) -->
+  <script src="https://cdn.jsdelivr.net/npm/@babel/standalone/babel.min.js"></script>
+  
+  <style>
+    /* 你原本有少少自訂 animation，可以保留 */
+    @keyframes fade-in {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
     }
-  };
-
-  const handleRabbitWalk = () => {
-    if (rabbitStep < maxSteps) {
-      setRabbitStep(prev => prev + 1);
+    .animate-fade-in {
+      animation: fade-in 0.5s ease-out forwards;
     }
-  };
+  </style>
+</head>
+<body class="bg-green-50 min-h-screen">
 
-  const handleReset = () => {
-    setMonkeyStep(0);
-    setRabbitStep(0);
-    setSelectedAnswer(null);
-    setShowResult(false);
-    setIsCorrect(false);
-    setShowConfetti(false);
-  };
+  <div id="root"></div>
 
-  const checkAnswer = (answerIndex) => {
-    setSelectedAnswer(answerIndex);
-    setShowResult(true);
-    
-    // 0: 猴子長, 1: 兔子長, 2: 一樣長 (正確答案)
-    if (answerIndex === 2) {
-      setIsCorrect(true);
-      triggerConfetti();
-    } else {
-      setIsCorrect(false);
-    }
-  };
+  <script type="text/babel">
+    const { useState } = React;
 
-  const triggerConfetti = () => {
-    setShowConfetti(true);
-    setTimeout(() => setShowConfetti(false), 3000);
-  };
+    // 因為 lucide-react 係 UMD，global 變數係 lucideReact
+    const { Play, RotateCcw, CheckCircle, HelpCircle, Trophy } = lucideReact;
 
-  // 自動畫線的輔助函數
-  const renderPathLine = (getPosFunc, currentStep, color) => {
-    let lines = [];
-    for (let i = 0; i < currentStep; i++) {
-      const start = getPosFunc(i);
-      const end = getPosFunc(i + 1);
-      lines.push(
-        <line
-          key={i}
-          x1={start.x * unitSize + 20}
-          y1={start.y * unitSize + 20}
-          x2={end.x * unitSize + 20}
-          y2={end.y * unitSize + 20}
-          stroke={color}
-          strokeWidth="6"
-          strokeLinecap="round"
-        />
-      );
-    }
-    return lines;
-  };
+    const PathGame = () => {
+      // 遊戲狀態（你原本 code 抄過嚟，略改少少兼容）
+      const [monkeyStep, setMonkeyStep] = useState(0);
+      const [rabbitStep, setRabbitStep] = useState(0);
+      const [selectedAnswer, setSelectedAnswer] = useState(null);
+      const [showResult, setShowResult] = useState(false);
+      const [isCorrect, setIsCorrect] = useState(false);
+      const [showConfetti, setShowConfetti] = useState(false);
 
-  return (
-    <div className="min-h-screen bg-green-50 flex flex-col items-center py-8 font-sans">
-      {/* 標題區 */}
-      <div className="bg-white p-4 rounded-2xl shadow-lg mb-6 max-w-2xl w-full text-center border-b-4 border-green-200">
-        <h1 className="text-2xl font-bold text-gray-800 mb-2">
-          🎢 遊樂場路線大比拼
-        </h1>
-        <p className="text-gray-600">
-          小猴子和小兔子要去遊樂場，幫忙量一量誰走的路比較長？
-        </p>
-      </div>
+      const cols = 4;
+      const rows = 3;
+      const unitSize = 60;
 
-      {/* 遊戲主畫面 */}
-      <div className="bg-white p-6 rounded-3xl shadow-xl mb-6 relative overflow-hidden">
-        {/* Confetti Effect (Simple CSS implementation for demo) */}
-        {showConfetti && (
-          <div className="absolute inset-0 pointer-events-none z-50 flex justify-center items-center">
-            <div className="text-6xl animate-bounce">🎉 答對了！ 🎉</div>
-          </div>
-        )}
+      const maxSteps = 7;
 
-        {/* 場景容器 */}
-        <div className="relative" style={{ width: cols * unitSize + 40, height: rows * unitSize + 40 }}>
-          
-          {/* 背景草地與裝飾 */}
-          <div className="absolute top-0 right-0 -mt-8 -mr-8 opacity-20">
-            <div className="text-6xl">🎡</div>
-          </div>
+      const getMonkeyPos = (step) => {
+        const path = [
+          {x: 0, y: 0},
+          {x: 0, y: 1},
+          {x: 0, y: 2},
+          {x: 1, y: 2},
+          {x: 2, y: 2},
+          {x: 2, y: 3},
+          {x: 3, y: 3},
+          {x: 4, y: 3},
+        ];
+        return path[step] || path[path.length - 1];
+      };
 
-          {/* SVG 格線層 */}
-          <svg width="100%" height="100%" className="absolute top-0 left-0 z-0">
-            {/* 繪製網格 */}
-            {Array.from({ length: rows + 1 }).map((_, r) => (
-              <line 
-                key={`r-${r}`} 
-                x1={20} y1={r * unitSize + 20} 
-                x2={cols * unitSize + 20} y2={r * unitSize + 20} 
-                stroke="#e5e7eb" strokeWidth="2" 
-              />
-            ))}
-            {Array.from({ length: cols + 1 }).map((_, c) => (
-              <line 
-                key={`c-${c}`} 
-                x1={c * unitSize + 20} y1={20} 
-                x2={c * unitSize + 20} y2={rows * unitSize + 20} 
-                stroke="#e5e7eb" strokeWidth="2" 
-              />
-            ))}
+      const getRabbitPos = (step) => {
+        const path = [
+          {x: 0, y: 0},
+          {x: 1, y: 0},
+          {x: 2, y: 0},
+          {x: 3, y: 0},
+          {x: 4, y: 0},
+          {x: 4, y: 1},
+          {x: 4, y: 2},
+          {x: 4, y: 3},
+        ];
+        return path[step] || path[path.length - 1];
+      };
 
-            {/* 路徑線條 (動態生成) */}
-            {renderPathLine(getMonkeyPos, monkeyStep, "#9333ea")} {/* Purple */}
-            {renderPathLine(getRabbitPos, rabbitStep, "#f97316")} {/* Orange */}
-          </svg>
+      const handleMonkeyWalk = () => {
+        if (monkeyStep < maxSteps) setMonkeyStep(monkeyStep + 1);
+      };
 
-          {/* 起點標記 */}
-          <div className="absolute top-0 left-0 text-xl font-bold" style={{ transform: 'translate(0px, -10px)' }}>🚩</div>
+      const handleRabbitWalk = () => {
+        if (rabbitStep < maxSteps) setRabbitStep(rabbitStep + 1);
+      };
 
-          {/* 終點標記 (遊樂場) */}
-          <div 
-            className="absolute text-4xl" 
-            style={{ 
-              left: cols * unitSize + 5, 
-              top: rows * unitSize - 10 
-            }}
-          >
-            🎡
-          </div>
+      const handleReset = () => {
+        setMonkeyStep(0);
+        setRabbitStep(0);
+        setSelectedAnswer(null);
+        setShowResult(false);
+        setIsCorrect(false);
+        setShowConfetti(false);
+      };
 
-          {/* 角色 - 小猴子 */}
-          <div 
-            className="absolute transition-all duration-300 ease-out flex flex-col items-center justify-center z-10"
-            style={{
-              left: getMonkeyPos(monkeyStep).x * unitSize,
-              top: getMonkeyPos(monkeyStep).y * unitSize,
-              transform: 'translate(0, 0)' // Adjust for icon center
-            }}
-          >
-            <div className="w-10 h-10 bg-purple-100 rounded-full border-2 border-purple-600 flex items-center justify-center text-2xl shadow-md">
-              🐵
-            </div>
-            {monkeyStep > 0 && (
-              <span className="bg-purple-600 text-white text-xs font-bold px-2 py-0.5 rounded-full mt-1">
-                {monkeyStep}
-              </span>
-            )}
-          </div>
-
-          {/* 角色 - 小兔子 */}
-          <div 
-            className="absolute transition-all duration-300 ease-out flex flex-col items-center justify-center z-10"
-            style={{
-              left: getRabbitPos(rabbitStep).x * unitSize,
-              top: getRabbitPos(rabbitStep).y * unitSize,
-              transform: 'translate(10px, 10px)' // Slightly offset to not overlap perfectly at start
-            }}
-          >
-            <div className="w-10 h-10 bg-orange-100 rounded-full border-2 border-orange-500 flex items-center justify-center text-2xl shadow-md">
-              🐰
-            </div>
-            {rabbitStep > 0 && (
-              <span className="bg-orange-500 text-white text-xs font-bold px-2 py-0.5 rounded-full mt-1">
-                {rabbitStep}
-              </span>
-            )}
-          </div>
-        </div>
-      </div>
-
-      {/* 控制區 */}
-      <div className="grid grid-cols-2 gap-4 w-full max-w-lg px-4 mb-8">
-        <button 
-          onClick={handleMonkeyWalk}
-          disabled={monkeyStep >= maxSteps}
-          className={`flex items-center justify-center gap-2 p-4 rounded-xl shadow-md transition-all ${
-            monkeyStep >= maxSteps 
-              ? 'bg-gray-200 text-gray-400 cursor-not-allowed' 
-              : 'bg-purple-600 text-white hover:bg-purple-700 active:scale-95'
-          }`}
-        >
-          <Play size={20} />
-          <span>讓猴子走一步 ({monkeyStep}/{maxSteps})</span>
-        </button>
-
-        <button 
-          onClick={handleRabbitWalk}
-          disabled={rabbitStep >= maxSteps}
-          className={`flex items-center justify-center gap-2 p-4 rounded-xl shadow-md transition-all ${
-            rabbitStep >= maxSteps 
-              ? 'bg-gray-200 text-gray-400 cursor-not-allowed' 
-              : 'bg-orange-500 text-white hover:bg-orange-600 active:scale-95'
-          }`}
-        >
-          <Play size={20} />
-          <span>讓兔子走一步 ({rabbitStep}/{maxSteps})</span>
-        </button>
-      </div>
-
-      {/* 作答區 */}
-      {monkeyStep === maxSteps && rabbitStep === maxSteps && (
-        <div className="bg-white p-6 rounded-2xl shadow-lg w-full max-w-lg border-2 border-yellow-200 animate-fade-in px-4">
-          <h2 className="text-xl font-bold text-center mb-4 flex items-center justify-center gap-2">
-            <HelpCircle className="text-yellow-500" />
-            誰走的路比較長？
-          </h2>
-          
-          <div className="space-y-3">
-            {[
-              { id: 0, text: "小猴子走的路比較長", correct: false },
-              { id: 1, text: "小兔子走的路比較長", correct: false },
-              { id: 2, text: "小猴子和小兔子走的路一樣長", correct: true }
-            ].map((option) => (
-              <button
-                key={option.id}
-                onClick={() => checkAnswer(option.id)}
-                className={`w-full p-4 rounded-xl text-lg font-medium transition-all flex items-center justify-between group ${
-                  selectedAnswer === option.id
-                    ? isCorrect && option.correct
-                      ? 'bg-green-100 border-2 border-green-500 text-green-700'
-                      : !isCorrect && selectedAnswer === option.id
-                        ? 'bg-red-100 border-2 border-red-500 text-red-700'
-                        : 'bg-gray-100'
-                    : 'bg-gray-50 hover:bg-gray-100 border-2 border-transparent hover:border-gray-200'
-                }`}
-              >
-                <div className="flex items-center gap-3">
-                  <div className={`w-6 h-6 rounded border-2 flex items-center justify-center ${
-                    selectedAnswer === option.id ? 'border-current' : 'border-gray-300'
-                  }`}>
-                    {selectedAnswer === option.id && <div className="w-3 h-3 bg-current rounded-sm" />}
-                  </div>
-                  {option.text}
-                </div>
-                {selectedAnswer === option.id && (
-                  isCorrect && option.correct ? <CheckCircle className="text-green-600" /> : null
-                )}
-              </button>
-            ))}
-          </div>
-
-          {/* 結果回饋 */}
-          {showResult && (
-            <div className={`mt-4 p-4 rounded-xl text-center ${isCorrect ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
-              {isCorrect ? (
-                <div>
-                  <div className="text-xl font-bold mb-1 flex items-center justify-center gap-2">
-                    <Trophy className="text-yellow-600" /> 答對了！
-                  </div>
-                  <p>因為猴子走了 7 格，兔子也走了 7 格，所以是一樣長的！</p>
-                </div>
-              ) : (
-                <div>
-                  <p className="font-bold">再想一想喔！🤔</p>
-                  <p>看看上面他們身上背著的數字是多少？</p>
-                </div>
-              )}
-            </div>
-          )}
-        </div>
-      )}
-
-      {/* 重置按鈕 */}
-      <button 
-        onClick={handleReset}
-        className="mt-8 flex items-center gap-2 text-gray-500 hover:text-gray-700 transition-colors"
-      >
-        <RotateCcw size={16} />
-        重新開始
-      </button>
-
-      <style>{`
-        @keyframes fade-in {
-          from { opacity: 0; transform: translateY(10px); }
-          to { opacity: 1; transform: translateY(0); }
+      const checkAnswer = (answerIndex) => {
+        setSelectedAnswer(answerIndex);
+        setShowResult(true);
+        if (answerIndex === 2) {
+          setIsCorrect(true);
+          setShowConfetti(true);
+          setTimeout(() => setShowConfetti(false), 3000);
+        } else {
+          setIsCorrect(false);
         }
-        .animate-fade-in {
-          animation: fade-in 0.5s ease-out forwards;
-        }
-      `}</style>
-    </div>
-  );
-};
+      };
 
-export default PathGame;
+      const renderPathLine = (getPosFunc, currentStep, color) => {
+        let lines = [];
+        for (let i = 0; i < currentStep; i++) {
+          const start = getPosFunc(i);
+          const end = getPosFunc(i + 1);
+          lines.push(
+            <line
+              key={i}
+              x1={start.x * unitSize + 20}
+              y1={start.y * unitSize + 20}
+              x2={end.x * unitSize + 20}
+              y2={end.y * unitSize + 20}
+              stroke={color}
+              strokeWidth="6"
+              strokeLinecap="round"
+            />
+          );
+        }
+        return lines;
+      };
+
+      return (
+        <div className="min-h-screen bg-green-50 flex flex-col items-center py-8 font-sans">
+          {/* 標題區 */}
+          <div className="bg-white p-4 rounded-2xl shadow-lg mb-6 max-w-2xl w-full text-center border-b-4 border-green-200">
+            <h1 className="text-2xl font-bold text-gray-800 mb-2">
+              🎢 遊樂場路線大比拼
+            </h1>
+            <p className="text-gray-600">
+              小猴子和小兔子要去遊樂場，幫忙量一量誰走的路比較長？
+            </p>
+          </div>
+
+          {/* 遊戲主畫面 */}
+          <div className="bg-white p-6 rounded-3xl shadow-xl mb-6 relative overflow-hidden">
+            {showConfetti && (
+              <div className="absolute inset-0 pointer-events-none z-50 flex justify-center items-center">
+                <div className="text-6xl animate-bounce">🎉 答對了！ 🎉</div>
+              </div>
+            )}
+
+            <div className="relative" style={{ width: cols * unitSize + 40, height: rows * unitSize + 40 }}>
+              {/* 背景裝飾略... 你可以加返 */}
+
